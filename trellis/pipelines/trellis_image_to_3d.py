@@ -212,7 +212,8 @@ class TrellisImageTo3DPipeline(Pipeline):
         """
         ret = {}
         if 'mesh' in formats:
-            ret['mesh'] = self.models['slat_decoder_mesh'](slat)
+            model = self.models['slat_decoder_mesh']
+            ret['mesh'] = model(slat) # TODO find out why this is such a big performance hit
         if 'gaussian' in formats:
             ret['gaussian'] = self.models['slat_decoder_gs'](slat)
         if 'radiance_field' in formats:

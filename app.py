@@ -169,6 +169,9 @@ def image_to_3d(
         )
     video = render_utils.render_video(outputs['gaussian'][0], num_frames=120)['color']
     video_geo = render_utils.render_video(outputs['mesh'][0], num_frames=120)['normal']
+    video = [Image.fromarray(frame) for frame in video]
+    video = [frame.resize((512, 512)) for frame in video]
+    video_geo = [Image.fromarray(frame) for frame in video_geo] 
     video = [np.concatenate([video[i], video_geo[i]], axis=1) for i in range(len(video))]
     video_path = os.path.join(user_dir, 'sample.mp4')
     imageio.mimsave(video_path, video, fps=15)

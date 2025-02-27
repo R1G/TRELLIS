@@ -53,10 +53,7 @@ def render(viewpoint_camera, pc : Gaussian, pipe, bg_color : torch.Tensor, scali
     
     Background tensor (bg_color) must be on GPU!
     """
-    # lazy import
-    if 'GaussianRasterizer' not in globals():
-        from diff_gaussian_rasterization import GaussianRasterizer, GaussianRasterizationSettings
-    
+    from .diff_gaussian_rasterization import GaussianRasterizer, GaussianRasterizationSettings
     # Create zero tensor. We will use it to make pytorch return gradients of the 2D (screen-space) means
     screenspace_points = torch.zeros_like(pc.get_xyz, dtype=pc.get_xyz.dtype, requires_grad=True, device="cuda") + 0
     try:
@@ -121,15 +118,15 @@ def render(viewpoint_camera, pc : Gaussian, pipe, bg_color : torch.Tensor, scali
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, radii = rasterizer(
-        means3D = means3D,
-        means2D = means2D,
-        shs = shs,
-        colors_precomp = colors_precomp,
-        opacities = opacity,
-        scales = scales,
-        rotations = rotations,
-        cov3D_precomp = cov3D_precomp
+    rendered_image, radii, _, _, _, _ = rasterizer.forward(
+        means3D=means3D,
+        means2D=means2D,
+        shs=shs,
+        colors_precomp=colors_precomp,
+        opacities=opacity,
+        scales=scales,
+        rotations=rotations,
+        cov3D_precomp=cov3D_precomp
     )
 
     # Those Gaussians that were frustum culled or had a radius of 0 were not visible.
