@@ -1,0 +1,210 @@
+[
+    {
+        "id": "any-to-any",
+        "label": "Any-to-Any"
+    },
+    {
+        "id": "audio-classification",
+        "label": "Audio Classification"
+    },
+    {
+        "id": "audio-to-audio",
+        "label": "Audio-to-Audio"
+    },
+    {
+        "id": "audio-text-to-text",
+        "label": "Audio-Text-to-Text"
+    },
+    {
+        "id": "automatic-speech-recognition",
+        "label": "Automatic Speech Recognition"
+    },
+    {
+        "id": "depth-estimation",
+        "label": "Depth Estimation"
+    },
+    {
+        "id": "document-question-answering",
+        "label": "Document Question Answering"
+    },
+    {
+        "id": "feature-extraction",
+        "label": "Feature Extraction"
+    },
+    {
+        "id": "fill-mask",
+        "label": "Fill-Mask"
+    },
+    {
+        "id": "image-classification",
+        "label": "Image Classification"
+    },
+    {
+        "id": "image-feature-extraction",
+        "label": "Image Feature Extraction"
+    },
+    {
+        "id": "image-segmentation",
+        "label": "Image Segmentation"
+    },
+    {
+        "id": "image-to-image",
+        "label": "Image-to-Image"
+    },
+    {
+        "id": "image-text-to-text",
+        "label": "Image-Text-to-Text"
+    },
+    {
+        "id": "image-to-text",
+        "label": "Image-to-Text"
+    },
+    {
+        "id": "keypoint-detection",
+        "label": "Keypoint Detection"
+    },
+    {
+        "id": "mask-generation",
+        "label": "Mask Generation"
+    },
+    {
+        "id": "object-detection",
+        "label": "Object Detection"
+    },
+    {
+        "id": "video-classification",
+        "label": "Video Classification"
+    },
+    {
+        "id": "question-answering",
+        "label": "Question Answering"
+    },
+    {
+        "id": "reinforcement-learning",
+        "label": "Reinforcement Learning"
+    },
+    {
+        "id": "sentence-similarity",
+        "label": "Sentence Similarity"
+    },
+    {
+        "id": "summarization",
+        "label": "Summarization"
+    },
+    {
+        "id": "table-question-answering",
+        "label": "Table Question Answering"
+    },
+    {
+        "id": "tabular-classification",
+        "label": "Tabular Classification"
+    },
+    {
+        "id": "tabular-regression",
+        "label": "Tabular Regression"
+    },
+    {
+        "id": "text-classification",
+        "label": "Text Classification"
+    },
+    {
+        "id": "text-generation",
+        "label": "Text Generation"
+    },
+    {
+        "id": "text-to-image",
+        "label": "Text-to-Image"
+    },
+    {
+        "id": "text-to-speech",
+        "label": "Text-to-Speech"
+    },
+    {
+        "id": "text-to-video",
+        "label": "Text-to-Video"
+    },
+    {
+        "id": "token-classification",
+        "label": "Token Classification"
+    },
+    {
+        "id": "translation",
+        "label": "Translation"
+    },
+    {
+        "id": "unconditional-image-generation",
+        "label": "Unconditional Image Generation"
+    },
+    {
+        "id": "video-text-to-text",
+        "label": "Video-Text-to-Text"
+    },
+    {
+        "id": "visual-question-answering",
+        "label": "Visual Question Answering"
+    },
+    {
+        "id": "zero-shot-classification",
+        "label": "Zero-Shot Classification"
+    },
+    {
+        "id": "zero-shot-image-classification",
+        "label": "Zero-Shot Image Classification"
+    },
+    {
+        "id": "zero-shot-object-detection",
+        "label": "Zero-Shot Object Detection"
+    },
+    {
+        "id": "text-to-3d",
+        "label": "Text-to-3D"
+    },
+    {
+        "id": "image-to-3d",
+        "label": "Image-to-3D"
+    },
+    {
+        "id": "text2text-generation",
+        "label": "Text2Text Generation"
+    },
+    {
+        "id": "text-to-audio",
+        "label": "Text-to-Audio"
+    },
+    {
+        "id": "voice-activity-detection",
+        "label": "Voice Activity Detection"
+    },
+    {
+        "id": "image-to-video",
+        "label": "Image-to-Video"
+    },
+    {
+        "id": "robotics",
+        "label": "Robotics"
+    },
+    {
+        "id": "time-series-forecasting",
+        "label": "Time Series Forecasting"
+    },
+    {
+        "id": "graph-ml",
+        "label": "Graph Machine Learning"
+    },
+    {
+        "id": "tabular-to-text",
+        "label": "tabular-to-text"
+    },
+    {
+        "id": "table-to-text",
+        "label": "table-to-text"
+    },
+    {
+        "id": "multiple-choice",
+        "label": "multiple-choice"
+    },
+    {
+        "id": "text-retrieval",
+        "label": "text-retrieval"
+    }
+]
