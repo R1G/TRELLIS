@@ -396,3 +396,19 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/datasets.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/models.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/user_like_model.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/user_publish_model.json
+tmp/ih072lbyxbj/sample.mp4
+tmp/ih072lbyxbj/sample.glb
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/users.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/user_like_space.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/spaces_with_created_at.json
+dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/model_definedFor_task.json
+dataset_toolkits/blender_script/io_scene_usdz.zip
+tmp/ih072lbyxbj/sample.glb
+tmp/ih072lbyxbj/sample.mp4
+dataset_toolkits/blender_script/io_scene_usdz.zip
+/dataset_toolkits
+*.zip
