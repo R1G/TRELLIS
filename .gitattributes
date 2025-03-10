@@ -29,3 +29,4 @@ C:/Users/rdeshpande/Documents/GitHub/team3-ai/TRELLIS/dataset_toolkits/datasets/
 C:/Users/rdeshpande/Documents/GitHub/team3-ai/TRELLIS/dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/user_like_model.json filter=lfs diff=lfs merge=lfs -text
 C:/Users/rdeshpande/Documents/GitHub/team3-ai/TRELLIS/dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/models.json filter=lfs diff=lfs merge=lfs -text
 C:/Users/rdeshpande/Documents/GitHub/team3-ai/TRELLIS/dataset_toolkits/datasets/HuggingKG_V20241215174821/HuggingKG_V20241215174821/datasets.json filter=lfs diff=lfs merge=lfs -text
+C:/Users/rdeshpande/Documents/GitHub/team3-ai/TRELLIS/dataset_toolkits/blender_script/io_scene_usdz.zip filter=lfs diff=lfs merge=lfs -text
