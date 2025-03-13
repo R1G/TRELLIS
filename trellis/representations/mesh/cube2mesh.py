@@ -3,6 +3,7 @@ from ...modules.sparse import SparseTensor
 from easydict import EasyDict as edict
 from .utils_cube import *
 from .flexicubes.flexicubes import FlexiCubes
+import mcubes
 
 
 class MeshExtractResult:
@@ -120,8 +121,20 @@ class SparseFeatures2Mesh:
             colors_d = None
             
         x_nx3 = get_defomed_verts(self.reg_v, deform_d, self.res)
-        
-        vertices, faces, L_dev, colors = self.mesh_extractor(
+
+        # FlexiCubes version
+        # vertices, faces, L_dev, colors = self.mesh_extractor(
+        #     voxelgrid_vertices=x_nx3,
+        #     scalar_field=sdf_d,
+        #     cube_idx=self.reg_c,
+        #     resolution=self.res,
+        #     beta=weights_d[:, :12],
+        #     alpha=weights_d[:, 12:20],
+        #     gamma_f=weights_d[:, 20],
+        #     voxelgrid_colors=colors_d,
+        #     training=training)
+
+        vertices, faces, L_dev, color = self.mesh_extractor(
             voxelgrid_vertices=x_nx3,
             scalar_field=sdf_d,
             cube_idx=self.reg_c,
@@ -130,14 +143,15 @@ class SparseFeatures2Mesh:
             alpha=weights_d[:, 12:20],
             gamma_f=weights_d[:, 20],
             voxelgrid_colors=colors_d,
-            training=training)
-        
-        mesh = MeshExtractResult(vertices=vertices, faces=faces, vertex_attrs=colors, res=self.res)
+            training=training
+        )
+
+        mesh = MeshExtractResult(vertices=vertices, faces=faces, res=self.res)
         if training:
             if mesh.success:
-                reg_loss += L_dev.mean() * 0.5
-            reg_loss += (weights[:,:20]).abs().mean() * 0.2
-            mesh.reg_loss = reg_loss
-            mesh.tsdf_v = get_defomed_verts(v_pos, v_attrs[:, 1:4], self.res)
-            mesh.tsdf_s = v_attrs[:, 0]
+                reg_loss += self.mesh_extractor._compute_reg_loss()
+                reg_loss += (weights[:,:20]).abs().mean() * 0.2
+                mesh.reg_loss = reg_loss
+                mesh.tsdf_v = get_defomed_verts(v_pos, v_attrs[:, 1:4], self.res)
+                mesh.tsdf_s = v_attrs[:, 0]
         return mesh
