@@ -10,6 +10,20 @@ from ..modules import sparse as sp
 from .random_utils import sphere_hammersley_sequence
 
 
+DEBUG = 0
+
+def debug_print(func):
+    def wrapper(*args, **kwargs):
+        if DEBUG:
+            print(f"Calling {func.__name__}...")
+        result = func(*args, **kwargs)
+        if DEBUG:
+            print(f"{func.__name__} returned {type(result)}")
+        return result
+    return wrapper
+
+
+@debug_print
 def yaw_pitch_r_fov_to_extrinsics_intrinsics(yaws, pitchs, rs, fovs):
     is_list = isinstance(yaws, list)
     if not is_list:
@@ -39,7 +53,7 @@ def yaw_pitch_r_fov_to_extrinsics_intrinsics(yaws, pitchs, rs, fovs):
         intrinsics = intrinsics[0]
     return extrinsics, intrinsics
 
-
+@debug_print
 def render_frames(sample, extrinsics, intrinsics, options={}, colors_overwrite=None, verbose=True, **kwargs):
     if isinstance(sample, Octree):
         renderer = OctreeRenderer()
@@ -83,10 +97,14 @@ def render_frames(sample, extrinsics, intrinsics, options={}, colors_overwrite=N
         else:
             res = renderer.render(sample, extr, intr)
             if 'normal' not in rets: rets['normal'] = []
-            rets['normal'].append(np.clip(res['normal'].detach().cpu().numpy().transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8))
+            try:
+                rets['normal'].append(np.clip(res['normal'].detach().cpu().numpy().transpose(1, 2, 0) * 255, 0, 255).astype(np.uint8))
+            except ValueError:
+                rez = renderer.rendering_options.resolution
+                rets['normal'].append(np.zeros((rez, rez, 3), dtype=np.uint8))
     return rets
 
-
+@debug_print
 def render_video(sample, resolution=512, bg_color=(0, 0, 0), num_frames=300, r=2, fov=40, **kwargs):
     yaws = torch.linspace(0, 2 * 3.1415, num_frames)
     pitch = 0.25 + 0.5 * torch.sin(torch.linspace(0, 2 * 3.1415, num_frames))
@@ -95,7 +113,7 @@ def render_video(sample, resolution=512, bg_color=(0, 0, 0), num_frames=300, r=2
     extrinsics, intrinsics = yaw_pitch_r_fov_to_extrinsics_intrinsics(yaws, pitch, r, fov)
     return render_frames(sample, extrinsics, intrinsics, {'resolution': resolution, 'bg_color': bg_color}, **kwargs)
 
-
+@debug_print
 def render_multiview(sample, resolution=512, nviews=30):
     r = 2
     fov = 40
@@ -106,7 +124,7 @@ def render_multiview(sample, resolution=512, nviews=30):
     res = render_frames(sample, extrinsics, intrinsics, {'resolution': resolution, 'bg_color': (0, 0, 0)})
     return res['color'], extrinsics, intrinsics
 
-
+@debug_print
 def render_snapshot(samples, resolution=512, bg_color=(0, 0, 0), offset=(-16 / 180 * np.pi, 20 / 180 * np.pi), r=10, fov=8, **kwargs):
     yaw = [0, np.pi/2, np.pi, 3*np.pi/2]
     yaw_offset = offset[0]
@@ -114,3 +132,4 @@ def render_snapshot(samples, resolution=512, bg_color=(0, 0, 0), offset=(-16 / 1
     pitch = [offset[1] for _ in range(4)]
     extrinsics, intrinsics = yaw_pitch_r_fov_to_extrinsics_intrinsics(yaw, pitch, r, fov)
     return render_frames(samples, extrinsics, intrinsics, {'resolution': resolution, 'bg_color': bg_color}, **kwargs)
+

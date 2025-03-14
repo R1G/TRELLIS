@@ -19,6 +19,16 @@ import torch.nn.functional as F
 from easydict import EasyDict as edict
 
 
+DEBUG = 0
+
+def debug_print(func):
+    def wrapper(*args, **kwargs):
+        if DEBUG:
+            print(f"Entering {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+
 def intrinsics_to_projection(
         intrinsics: torch.Tensor,
         near: float,
@@ -53,7 +63,7 @@ def render(viewpoint_camera, pc : Gaussian, pipe, bg_color : torch.Tensor, scali
     
     Background tensor (bg_color) must be on GPU!
     """
-    from .diff_gaussian_rasterization import GaussianRasterizer, GaussianRasterizationSettings
+    
     # Create zero tensor. We will use it to make pytorch return gradients of the 2D (screen-space) means
     screenspace_points = torch.zeros_like(pc.get_xyz, dtype=pc.get_xyz.dtype, requires_grad=True, device="cuda") + 0
     try:
@@ -66,6 +76,8 @@ def render(viewpoint_camera, pc : Gaussian, pipe, bg_color : torch.Tensor, scali
     
     kernel_size = pipe.kernel_size
     subpixel_offset = torch.zeros((int(viewpoint_camera.image_height), int(viewpoint_camera.image_width), 2), dtype=torch.float32, device="cuda")
+
+    from .diff_gaussian_rasterization.diff_gaussian_rasterization import GaussianRasterizer, GaussianRasterizationSettings
 
     raster_settings = GaussianRasterizationSettings(
         image_height=int(viewpoint_camera.image_height),
@@ -118,7 +130,7 @@ def render(viewpoint_camera, pc : Gaussian, pipe, bg_color : torch.Tensor, scali
         colors_precomp = override_color
 
     # Rasterize visible Gaussians to image, obtain their radii (on screen). 
-    rendered_image, radii, _, _, _, _ = rasterizer.forward(
+    rendered_image, radii = rasterizer.forward(
         means3D=means3D,
         means2D=means2D,
         shs=shs,
@@ -144,7 +156,7 @@ class GaussianRenderer:
     Args:
         rendering_options (dict): Rendering options.
     """
-
+    @debug_print
     def __init__(self, rendering_options={}) -> None:
         self.pipe = edict({
             "kernel_size": 0.1,
@@ -163,6 +175,7 @@ class GaussianRenderer:
         self.rendering_options.update(rendering_options)
         self.bg_color = None
     
+    @debug_print
     def render(
             self,
             gausssian: Gaussian,

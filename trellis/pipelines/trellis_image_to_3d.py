@@ -14,6 +14,15 @@ from . import samplers
 from ..modules import sparse as sp
 from ..representations import Gaussian, Strivec, MeshExtractResult
 
+DEBUG = True
+
+def debug_print(func):
+    def wrapper(*args, **kwargs):
+        if DEBUG:
+            print(f"Entering {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
 
 class TrellisImageTo3DPipeline(Pipeline):
     """
@@ -26,6 +35,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         slat_normalization (dict): The normalization parameters for the structured latent.
         image_cond_model (str): The name of the image conditioning model.
     """
+    @debug_print    
     def __init__(
         self,
         models: dict[str, nn.Module] = None,
@@ -46,6 +56,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         self._init_image_cond_model(image_cond_model)
 
     @staticmethod
+    @debug_print    
     def from_pretrained(path: str) -> "TrellisImageTo3DPipeline":
         """
         Load a pretrained model.
@@ -82,6 +93,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         ])
         self.image_cond_model_transform = transform
 
+    @debug_print
     def preprocess_image(self, input: Image.Image) -> Image.Image:
         """
         Preprocess the input image.
@@ -118,6 +130,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         output = Image.fromarray((output * 255).astype(np.uint8))
         return output
 
+    @debug_print
     @torch.no_grad()
     def encode_image(self, image: Union[torch.Tensor, list[Image.Image]]) -> torch.Tensor:
         """
@@ -145,6 +158,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         patchtokens = F.layer_norm(features, features.shape[-1:])
         return patchtokens
         
+    @debug_print  
     def get_cond(self, image: Union[torch.Tensor, list[Image.Image]]) -> dict:
         """
         Get the conditioning information for the model.
@@ -162,6 +176,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             'neg_cond': neg_cond,
         }
 
+    @debug_print
     def sample_sparse_structure(
         self,
         cond: dict,
@@ -195,6 +210,7 @@ class TrellisImageTo3DPipeline(Pipeline):
 
         return coords
 
+    @debug_print
     def decode_slat(
         self,
         slat: sp.SparseTensor,
@@ -220,6 +236,7 @@ class TrellisImageTo3DPipeline(Pipeline):
             ret['radiance_field'] = self.models['slat_decoder_rf'](slat)
         return ret
     
+    @debug_print
     def sample_slat(
         self,
         cond: dict,
@@ -255,6 +272,7 @@ class TrellisImageTo3DPipeline(Pipeline):
         
         return slat
 
+    @debug_print
     @torch.no_grad()
     def run(
         self,

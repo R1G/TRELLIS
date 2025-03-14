@@ -2,7 +2,6 @@ import torch
 from ...modules.sparse import SparseTensor
 from easydict import EasyDict as edict
 from .utils_cube import *
-from .flexicubes.flexicubes import FlexiCubes
 import mcubes
 
 
@@ -14,7 +13,7 @@ class MeshExtractResult:
         res=64
     ):
         self.vertices = vertices
-        self.faces = faces.long()
+        self.faces = faces
         self.vertex_attrs = vertex_attrs
         self.face_normal = self.comput_face_normals(vertices, faces)
         self.res = res
@@ -26,14 +25,14 @@ class MeshExtractResult:
         self.reg_loss = None
         
     def comput_face_normals(self, verts, faces):
-        i0 = faces[..., 0].long()
-        i1 = faces[..., 1].long()
-        i2 = faces[..., 2].long()
+        i0 = faces[..., 0]
+        i1 = faces[..., 1]
+        i2 = faces[..., 2]
 
         v0 = verts[i0, :]
         v1 = verts[i1, :]
         v2 = verts[i2, :]
-        face_normals = torch.cross(v1 - v0, v2 - v0, dim=-1)
+        face_normals = torch.cross(torch.from_numpy(v1 - v0), torch.from_numpy(v2 - v0), dim=-1)
         face_normals = torch.nn.functional.normalize(face_normals, dim=1)
         # print(face_normals.min(), face_normals.max(), face_normals.shape)
         return face_normals[:, None, :].repeat(1, 3, 1)
@@ -64,7 +63,6 @@ class SparseFeatures2Mesh:
         super().__init__()
         self.device=device
         self.res = res
-        self.mesh_extractor = FlexiCubes(device=device)
         self.sdf_bias = -1.0 / res
         verts, cube = construct_dense_grid(self.res, self.device)
         self.reg_c = cube.to(self.device)
@@ -117,8 +115,7 @@ class SparseFeatures2Mesh:
         if self.use_color:
             sdf_d, deform_d, colors_d = v_attrs_d[..., 0], v_attrs_d[..., 1:4], v_attrs_d[..., 4:]
         else:
-            sdf_d, deform_d = v_attrs_d[..., 0], v_attrs_d[..., 1:4]
-            colors_d = None
+            sdf_d, deform_d, colors_d = v_attrs_d[..., 0], v_attrs_d[..., 1:4], None
             
         x_nx3 = get_defomed_verts(self.reg_v, deform_d, self.res)
 
@@ -133,25 +130,17 @@ class SparseFeatures2Mesh:
         #     gamma_f=weights_d[:, 20],
         #     voxelgrid_colors=colors_d,
         #     training=training)
-
-        vertices, faces, L_dev, color = self.mesh_extractor(
-            voxelgrid_vertices=x_nx3,
-            scalar_field=sdf_d,
-            cube_idx=self.reg_c,
-            resolution=self.res,
-            beta=weights_d[:, :12],
-            alpha=weights_d[:, 12:20],
-            gamma_f=weights_d[:, 20],
-            voxelgrid_colors=colors_d,
-            training=training
-        )
+        x_nx3_np = x_nx3.cpu().numpy()
+        if x_nx3_np.ndim != 3:
+            x_nx3_np = x_nx3_np.reshape(-1, 3, 1)
+        vertices, faces = mcubes.marching_cubes(x_nx3_np, 0.0)
 
         mesh = MeshExtractResult(vertices=vertices, faces=faces, res=self.res)
         if training:
             if mesh.success:
-                reg_loss += self.mesh_extractor._compute_reg_loss()
-                reg_loss += (weights[:,:20]).abs().mean() * 0.2
-                mesh.reg_loss = reg_loss
+                # reg_loss += self.mesh_extractor._compute_reg_loss()
+                # reg_loss += (weights[:,:20]).abs().mean() * 0.2
+                # mesh.reg_loss = reg_loss
                 mesh.tsdf_v = get_defomed_verts(v_pos, v_attrs[:, 1:4], self.res)
                 mesh.tsdf_s = v_attrs[:, 0]
         return mesh

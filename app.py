@@ -14,6 +14,17 @@ from trellis.representations import Gaussian, MeshExtractResult
 from trellis.utils import render_utils, postprocessing_utils
 
 
+DEBUG = 0
+
+def debug_print(func):
+    def wrapper(*args, **kwargs):
+        if DEBUG:
+            print(f"Entering {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+
+
 MAX_SEED = np.iinfo(np.int32).max
 TMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
 os.makedirs(TMP_DIR, exist_ok=True)
@@ -23,12 +34,12 @@ def start_session(req: gr.Request):
     user_dir = os.path.join(TMP_DIR, str(req.session_hash))
     os.makedirs(user_dir, exist_ok=True)
     
-    
+
 def end_session(req: gr.Request):
     user_dir = os.path.join(TMP_DIR, str(req.session_hash))
     shutil.rmtree(user_dir)
 
-
+@debug_print
 def preprocess_image(image: Image.Image) -> Image.Image:
     """
     Preprocess the input image.
@@ -42,7 +53,7 @@ def preprocess_image(image: Image.Image) -> Image.Image:
     processed_image = pipeline.preprocess_image(image)
     return processed_image
 
-
+@debug_print
 def preprocess_images(images: List[Tuple[Image.Image, str]]) -> List[Image.Image]:
     """
     Preprocess a list of input images.
@@ -57,7 +68,7 @@ def preprocess_images(images: List[Tuple[Image.Image, str]]) -> List[Image.Image
     processed_images = [pipeline.preprocess_image(image) for image in images]
     return processed_images
 
-
+@debug_print
 def pack_state(gs: Gaussian, mesh: MeshExtractResult) -> dict:
     return {
         'gaussian': {
@@ -69,12 +80,12 @@ def pack_state(gs: Gaussian, mesh: MeshExtractResult) -> dict:
             '_opacity': gs._opacity.cpu().numpy(),
         },
         'mesh': {
-            'vertices': mesh.vertices.cpu().numpy(),
-            'faces': mesh.faces.cpu().numpy(),
+            'vertices': mesh.vertices,
+            'faces': mesh.faces,
         },
     }
     
-    
+@debug_print
 def unpack_state(state: dict) -> Tuple[Gaussian, edict, str]:
     gs = Gaussian(
         aabb=state['gaussian']['aabb'],
@@ -97,7 +108,7 @@ def unpack_state(state: dict) -> Tuple[Gaussian, edict, str]:
     
     return gs, mesh
 
-
+@debug_print
 def get_seed(randomize_seed: bool, seed: int) -> int:
     """
     Get the random seed.
@@ -167,19 +178,27 @@ def image_to_3d(
             },
             mode=multiimage_algo,
         )
-    video = render_utils.render_video(outputs['gaussian'][0], num_frames=120)['color']
+    print("Rendering mesh normal video...")
     video_geo = render_utils.render_video(outputs['mesh'][0], num_frames=120)['normal']
-    video = [Image.fromarray(frame) for frame in video]
-    video = [frame.resize((512, 512)) for frame in video]
-    video_geo = [Image.fromarray(frame) for frame in video_geo] 
-    video = [np.concatenate([video[i], video_geo[i]], axis=1) for i in range(len(video))]
+    print("Rendering Gaussian rasterized video...")
+    video = render_utils.render_video(outputs['gaussian'][0], num_frames=120)['color']
+    min_frames = min(len(video), len(video_geo))
+    video = video[:min_frames]
+    video_geo = video_geo[:min_frames]
+    print("Packing output video...")
+    print(video)
+    print('='*10)
+    video = [np.concatenate([video[i], video_geo[i]], axis=1) for i in range(min_frames)]
+    print(video)
     video_path = os.path.join(user_dir, 'sample.mp4')
+    print("Saving output video...")
     imageio.mimsave(video_path, video, fps=15)
     state = pack_state(outputs['gaussian'][0], outputs['mesh'][0])
     torch.cuda.empty_cache()
+    print(f"Done. Saving to {video_path}")
     return state, video_path
 
-
+@debug_print
 def extract_glb(
     state: dict,
     mesh_simplify: float,
@@ -205,7 +224,7 @@ def extract_glb(
     torch.cuda.empty_cache()
     return glb_path, glb_path
 
-
+@debug_print
 def extract_gaussian(state: dict, req: gr.Request) -> Tuple[str, str]:
     """
     Extract a Gaussian file from the 3D model.
@@ -223,7 +242,7 @@ def extract_gaussian(state: dict, req: gr.Request) -> Tuple[str, str]:
     torch.cuda.empty_cache()
     return gaussian_path, gaussian_path
 
-
+@debug_print
 def prepare_multi_example() -> List[Image.Image]:
     multi_case = list(set([i.split('_')[0] for i in os.listdir("assets/example_multi_image")]))
     images = []
@@ -237,7 +256,7 @@ def prepare_multi_example() -> List[Image.Image]:
         images.append(Image.fromarray(np.concatenate(_images, axis=1)))
     return images
 
-
+@debug_print
 def split_image(image: Image.Image) -> List[Image.Image]:
     """
     Split an image into multiple views.
